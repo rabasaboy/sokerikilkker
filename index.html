@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="fi">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Pinkki Clicker</title>
+	<style>
+		:root{
+			--bg1: #ffeff6;
+			--bg2: #ffd7e9;
+			--accent: #ff66b2;
+			--accent-2: #ff4d9b;
+			--muted: #7a2a3f;
+			--card: rgba(255,255,255,0.95);
+			--glass: rgba(255,255,255,0.7);
+			--shadow: 0 18px 40px rgba(150,50,100,0.12);
+			font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+		}
+		*{box-sizing:border-box}
+		html,body{height:100%}
+		body{
+			margin:0;
+			display:flex;
+			align-items:center;
+			justify-content:center;
+			background:linear-gradient(135deg,var(--bg1),var(--bg2));
+			color:var(--muted);
+			-webkit-font-smoothing:antialiased;
+			-moz-osx-font-smoothing:grayscale;
+			padding:36px;
+		}
+
+		/* Card */
+		.app{
+			width:100%;
+			max-width:980px;
+			background:var(--card);
+			border-radius:14px;
+			padding:22px 26px;
+			box-shadow:var(--shadow);
+			display:flex;
+			flex-direction:column;
+			align-items:center;
+			position:relative;
+		}
+
+		/* Score badge top-right */
+		.score-badge{
+			position:absolute;right:18px;top:14px;text-align:right;color:var(--muted)
+		}
+		.score-badge .label{font-size:12px;opacity:.7}
+		.score-badge .value{font-weight:800;color:#341; font-size:26px}
+
+		.title{color:var(--accent-2);font-weight:700;font-size:16px}
+
+		/* Center area */
+		.center{
+			display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 16px;
+		}
+
+		.avatar-wrap{
+			width:260px;height:260px;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#fff,#ffeef7);
+			display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,80,150,0.06);
+			box-shadow:0 12px 30px rgba(255,80,150,0.12);
+			cursor:pointer;position:relative;
+		}
+		.avatar-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+		.avatar-placeholder{font-weight:700;color:var(--accent-2)}
+
+		.meta{margin-top:10px;display:flex;gap:16px;align-items:center}
+		.meta .small{font-size:13px;color:rgba(0,0,0,0.5)}
+		.link-reset{background:transparent;border:none;color:var(--accent-2);cursor:pointer;font-size:13px}
+
+		/* Right panel */
+		.panel{background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.95));padding:18px;border-radius:10px;width:100%;max-width:300px;margin-top:16px}
+		.panel h3{margin:0 0 10px 0;color:var(--accent-2);font-size:15px}
+		.upgrade{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:8px;margin-bottom:12px;background:rgba(255,255,255,0.6);border:1px solid rgba(220,100,160,0.06)}
+		.upgrade strong{display:block;color:#6d153a}
+		.upgrade .desc{font-size:13px;color:rgba(0,0,0,0.55)}
+		.btn-pink{background:linear-gradient(180deg,var(--accent),var(--accent-2));border:none;color:white;padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:700;box-shadow:0 6px 18px rgba(255,80,150,0.12)}
+		.cost{font-weight:700;margin-left:8px}
+
+		.footer{text-align:center;margin-top:16px;font-size:12px;color:rgba(60,10,30,0.5)}
+
+		.social-link{display:inline-block;margin-top:12px;padding:8px 14px;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:white;text-decoration:none;border-radius:999px;font-weight:700;font-size:13px;box-shadow:0 4px 12px rgba(255,80,150,0.15);transition:transform 0.2s}
+		.social-link:hover{transform:scale(1.05)}
+
+		@media (max-width:860px){
+			.app{max-width:500px}
+			.score-badge{text-align:left;margin-bottom:12px}
+			.avatar-wrap{width:220px;height:220px}
+		}
+	</style>
+</head>
+<body>
+	<div class="app">
+		<div class="title">Sokeripupu Clicker</div>
+		<div class="score-badge">
+			<div class="label">Pisteet</div>
+			<div class="value" id="score">0</div>
+		</div>
+
+		<section class="center">
+			<div class="small">Klikkaile menemää</div>
+
+			<div id="avatarWrap" class="avatar-wrap" title="Klikkaa saada pisteitä">
+				<div class="avatar-placeholder">Klikkaa lisätäksesi kuvan</div>
+				<img id="avatarImg" src="" alt="" style="display:none" />
+				<div id="perClick" class="perclick" style="position:absolute;left:50%;transform:translateX(-50%);bottom:10px;background:rgba(255,255,255,0.85);padding:6px 10px;border-radius:999px;font-weight:700;color:var(--accent-2)">+1</div>
+			</div>
+
+			<div class="meta">
+				<div class="small">CPS: <span id="cps">0</span></div>
+				<button id="reset" class="link-reset">Reset</button>
+			</div>
+		</section>
+
+		<aside class="panel">
+			<h3>Päivitykset</h3>
+			<div class="upgrade">
+				<div>
+					<strong>Voimakkuus</strong>
+					<div class="desc">Lisää pisteitä per klikkaus</div>
+				</div>
+				<div>
+					<button id="buyPower" class="btn-pink">Osta <span class="cost">(<span id="powerCost">10</span>)</span></button>
+				</div>
+			</div>
+
+			<div class="upgrade">
+				<div>
+					<strong>Autoclicker</strong>
+					<div class="desc">Antaa pisteitä automaattisesti</div>
+				</div>
+				<div>
+					<button id="buyAuto" class="btn-pink">Osta <span class="cost">(<span id="autoCost">50</span>)</span></button>
+				</div>
+			</div>
+
+			<div style="margin-top:8px;font-size:13px;color:rgba(0,0,0,0.55)"></div>
+		</aside>
+
+		<div class="footer">
+			<div>Versio 1.0</div>
+			<a href="https://www.tiktok.com/@aksulikiksuli" target="_blank" class="social-link">Mun TikTok</a>
+		</div>
+	</div>
+
+	<!-- Fixed embedded avatar; no upload input -->
+
+	<script>
+		const state = { score:0, perClick:1, powerLevel:0, autoLevel:0, lastTick: Date.now() };
+		const cost = (base, level) => Math.floor(base * Math.pow(1.6, level));
+
+		// Use workspace image file as fixed avatar (click-image.jpg)
+	 	const defaultAvatar = 'click-image.jpg';
+
+		const scoreEl = document.getElementById('score');
+		const cpsEl = document.getElementById('cps');
+		const buyPowerBtn = document.getElementById('buyPower');
+		const buyAutoBtn = document.getElementById('buyAuto');
+		const powerCostEl = document.getElementById('powerCost');
+		const autoCostEl = document.getElementById('autoCost');
+		const resetBtn = document.getElementById('reset');
+		const avatarWrap = document.getElementById('avatarWrap');
+		const avatarImg = document.getElementById('avatarImg');
+		const perClickEl = document.getElementById('perClick');
+
+		function load(){
+			try{
+				const raw = localStorage.getItem('pink-clicker');
+				if(raw) Object.assign(state, JSON.parse(raw));
+				// Use the workspace-provided image file as the fixed clicker image
+				avatarImg.src = defaultAvatar;
+				avatarImg.onerror = () => { 
+					avatarImg.onerror = null; 
+					console.warn(`Kuva ${defaultAvatar} ei löytynyt. Tarkista, että tiedosto on olemassa.`);
+				};
+				avatarImg.style.display = 'block';
+				avatarWrap.querySelector('.avatar-placeholder').style.display = 'none';
+			}catch(e){ console.warn(e) }
+		}
+		function save(){ try{ localStorage.setItem('pink-clicker', JSON.stringify(state)); }catch(e){}
+		}
+
+		function updateUI(){ scoreEl.textContent = Math.floor(state.score); powerCostEl.textContent = cost(10, state.powerLevel); autoCostEl.textContent = cost(50, state.autoLevel); cpsEl.textContent = (state.autoLevel).toFixed(1); }
+
+		// Click on avatar = earn points (avatar is fixed and cannot be changed)
+		avatarWrap.addEventListener('click', ()=>{
+			state.score += state.perClick;
+			animatePop(avatarWrap);
+			updateUI(); save();
+		});
+
+		buyPowerBtn.addEventListener('click', ()=>{ const c = cost(10, state.powerLevel); if(state.score >= c){ state.score-=c; state.powerLevel++; state.perClick = 1 + state.powerLevel; updateUI(); save(); } });
+		buyAutoBtn.addEventListener('click', ()=>{ const c = cost(50, state.autoLevel); if(state.score >= c){ state.score-=c; state.autoLevel++; updateUI(); save(); } });
+		resetBtn.addEventListener('click', ()=>{ if(confirm('Resettaa pelin?')){ localStorage.removeItem('pink-clicker'); state.score=0;state.perClick=1;state.powerLevel=0;state.autoLevel=0; updateUI(); } });
+
+		function animatePop(el){ el.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:160}); }
+
+		function tick(){ const now=Date.now(); const dt=(now-state.lastTick)/1000; state.lastTick=now; state.score += state.autoLevel * dt; updateUI(); save(); requestAnimationFrame(tick); }
+
+		load(); updateUI(); state.lastTick = Date.now(); // show perClick value
+		perClickEl.textContent = `+${state.perClick}`;
+		requestAnimationFrame(tick);
+	</script>
+</body>
+</html>
+
