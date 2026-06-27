@@ -174,6 +174,12 @@
 		}
 		.sound-button{margin-top:12px;padding:11px 16px;border:2px solid rgba(255,255,255,0.85);border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--bg3));color:white;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,45,158,0.35);transition:transform .15s ease}
 		.sound-button:hover{transform:scale(1.05)}
+		.player{background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.95));padding:20px;border-radius:18px;width:100%;max-width:340px;margin-top:20px;border:1px solid rgba(255,255,255,0.85);box-shadow:0 10px 30px rgba(255,45,158,0.12);text-align:center;}
+		.player h3{margin:0 0 10px 0;color:var(--accent-2);font-size:16px;font-weight:800;}
+		.player-track{font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+		.player-controls{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px;}
+		.player-time{font-size:12px;color:rgba(0,0,0,0.5);font-weight:600;min-width:80px;}
+		.player-seek{width:100%;accent-color:var(--accent-2);cursor:pointer;}
 		.leaderboard{width:100%;max-width:420px;margin-top:24px;background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.95));padding:20px;border-radius:18px;border:1px solid rgba(255,255,255,0.85);box-shadow:0 10px 30px rgba(255,45,158,0.12)}
 		.leaderboard h3{margin:0 0 14px 0;color:var(--accent-2);font-size:16px;font-weight:800;text-align:center}
 		#lbList{max-height:320px;overflow-y:auto;padding-right:4px;}
@@ -256,6 +262,17 @@
 				<div><button id="buyAuto" class="btn-pink">Osta <span class="cost">(<span id="autoCost">50</span>)</span></button></div>
 			</div>
 		</aside>
+
+		<div class="player">
+			<h3>Musiikkisoitin</h3>
+			<div class="player-track">CHEREP &amp; ARI OK – Курим План (Kurim plan)</div>
+			<div class="player-controls">
+				<button id="playMusicBtn" class="btn-pink">▶ Soita</button>
+				<span class="player-time" id="musicTime">0:00 / 0:00</span>
+			</div>
+			<input type="range" id="musicSeek" class="player-seek" value="0" min="0" max="100" step="0.1" />
+			<audio id="bgMusic" preload="auto" loop></audio>
+		</div>
 
 		<div class="leaderboard">
 			<h3>🏆 Tulostaulukko</h3>
@@ -409,6 +426,32 @@
 		loadLeaderboard();
 		setInterval(loadLeaderboard, 30000);
 		initOnline();
+
+		// ── Musiikkisoitin ──
+		const bgMusic     = document.getElementById('bgMusic');
+		const playMusicBtn= document.getElementById('playMusicBtn');
+		const musicSeek   = document.getElementById('musicSeek');
+		const musicTimeEl = document.getElementById('musicTime');
+		bgMusic.src = encodeURI('CHEREP & ARI OK - Курим План (Kurim plan).mp3');
+
+		function formatTime(s){
+			if(!isFinite(s)) return '0:00';
+			const m=Math.floor(s/60), sec=Math.floor(s%60).toString().padStart(2,'0');
+			return `${m}:${sec}`;
+		}
+		bgMusic.addEventListener('loadedmetadata', ()=>{
+			musicSeek.max = bgMusic.duration;
+			musicTimeEl.textContent = `0:00 / ${formatTime(bgMusic.duration)}`;
+		});
+		bgMusic.addEventListener('timeupdate', ()=>{
+			musicSeek.value = bgMusic.currentTime;
+			musicTimeEl.textContent = `${formatTime(bgMusic.currentTime)} / ${formatTime(bgMusic.duration)}`;
+		});
+		playMusicBtn.addEventListener('click', ()=>{
+			if(bgMusic.paused){ bgMusic.play().catch(()=>{}); playMusicBtn.textContent='⏸ Tauko'; }
+			else { bgMusic.pause(); playMusicBtn.textContent='▶ Soita'; }
+		});
+		musicSeek.addEventListener('input', ()=>{ bgMusic.currentTime = Number(musicSeek.value); });
 	</script>
 </body>
 </html>
