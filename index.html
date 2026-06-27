@@ -175,6 +175,8 @@
 		const scoreEl = document.getElementById('score');
 		const cpsEl = document.getElementById('cps');
 		const buyPowerBtn = document.getElementById('buyPower');
+		const clickSound = new Audio('lightningbulb-spacebar-click-keyboard-199448.mp3');
+		clickSound.preload = 'auto';
 		const buyAutoBtn = document.getElementById('buyAuto');
 		const powerCostEl = document.getElementById('powerCost');
 		const autoCostEl = document.getElementById('autoCost');
@@ -220,7 +222,15 @@
 
 		function updateUI(){ scoreEl.textContent = Math.floor(state.score); powerCostEl.textContent = cost(10, state.powerLevel); autoCostEl.textContent = cost(50, state.autoLevel); cpsEl.textContent = (state.autoLevel).toFixed(1); }
 
+		function playClickSound(){
+			try{
+				clickSound.currentTime = 0;
+				clickSound.play().catch(()=>{});
+			}catch(e){ }
+		}
+
 		avatarWrap.addEventListener('click', ()=>{
+			playClickSound();
 			state.score += state.perClick;
 			animatePop(avatarWrap);
 			updateUI(); save();
