@@ -89,6 +89,7 @@
 		.image-picker label{font-size:13px;color:rgba(0,0,0,0.6)}
 		.image-picker select{padding:8px 10px;border:1px solid rgba(255,80,150,0.2);border-radius:999px;background:white;color:var(--muted);font-weight:600;min-width:180px}
 		.image-picker .hint{font-size:12px;color:rgba(0,0,0,0.45);text-align:center}
+		.sound-button{margin-top:10px;padding:10px 14px;border:none;border-radius:999px;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:white;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,80,150,0.12)}
 
 		@media (max-width:860px){
 			.app{max-width:500px}
@@ -123,6 +124,8 @@
 				</select>
 				<div class="hint"></div>
 			</div>
+
+			<button id="playSoundBtn" class="sound-button">как проходит жизнь?</button>
 
 			<div class="meta">
 				<div class="small">CPS: <span id="cps">0</span></div>
@@ -175,12 +178,13 @@
 		const scoreEl = document.getElementById('score');
 		const cpsEl = document.getElementById('cps');
 		const buyPowerBtn = document.getElementById('buyPower');
-		const clickSound = new Audio('lightningbulb-spacebar-click-keyboard-199448.mp3');
+		const clickSound = new Audio('Record (online-voice-recorder.com).mp3');
 		clickSound.preload = 'auto';
 		const buyAutoBtn = document.getElementById('buyAuto');
 		const powerCostEl = document.getElementById('powerCost');
 		const autoCostEl = document.getElementById('autoCost');
 		const resetBtn = document.getElementById('reset');
+		const playSoundBtn = document.getElementById('playSoundBtn');
 		const avatarWrap = document.getElementById('avatarWrap');
 		const avatarImg = document.getElementById('avatarImg');
 		const avatarSelect = document.getElementById('avatarSelect');
@@ -240,6 +244,13 @@
 			state.selectedAvatar = Number(avatarSelect.value);
 			setAvatar(state.selectedAvatar);
 			save();
+		});
+
+		playSoundBtn.addEventListener('click', ()=>{
+			try{
+				clickSound.currentTime = 0;
+				clickSound.play().catch(()=>{});
+			}catch(e){ }
 		});
 
 		buyPowerBtn.addEventListener('click', ()=>{ const c = cost(10, state.powerLevel); if(state.score >= c){ state.score-=c; state.powerLevel++; state.perClick = 1 + state.powerLevel; updateUI(); save(); } });
