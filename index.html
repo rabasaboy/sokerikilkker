@@ -206,6 +206,16 @@
 			.score-badge{text-align:left;margin-bottom:12px}
 			.avatar-wrap{width:220px;height:220px}
 		}
+		.admin-overlay{position:fixed;inset:0;background:rgba(92,10,58,0.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;}
+		.admin-box{background:var(--card);border-radius:18px;padding:26px 24px;max-width:300px;width:100%;border:3px solid rgba(255,255,255,0.95);box-shadow:var(--shadow);position:relative;text-align:center;backdrop-filter:blur(6px);}
+		.admin-box h3{margin:0 0 14px 0;color:var(--accent-2);font-size:16px;font-weight:800;}
+		.admin-close{position:absolute;top:10px;right:12px;background:transparent;border:none;font-size:15px;cursor:pointer;color:var(--muted);font-weight:700;}
+		.admin-box input{width:100%;padding:9px 14px;margin-bottom:10px;border:2px solid rgba(255,255,255,0.85);border-radius:999px;font-size:14px;text-align:center;outline:none;color:var(--muted);}
+		.admin-box input:focus{border-color:#fff;box-shadow:0 0 0 3px rgba(255,45,158,0.25);}
+		.admin-msg{font-size:12px;color:#c0392b;font-weight:700;min-height:16px;}
+		.admin-current{font-size:14px;color:var(--muted);margin-bottom:12px;font-weight:600;}
+		.admin-btn-row{display:flex;gap:8px;justify-content:center;margin-bottom:14px;}
+		.admin-btn-row .btn-pink{flex:1;}
 		@media (prefers-reduced-motion: reduce){
 			*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
 		}
@@ -287,6 +297,30 @@
 		<div class="footer">
 			<div>Versio 1.0</div>
 			<a href="https://www.tiktok.com/@aksulikiksuli" target="_blank" class="social-link">Mun TikTok</a>
+			<div><button id="adminOpenBtn" class="link-reset" style="margin-top:8px;">🔧 Admin</button></div>
+		</div>
+	</div>
+
+	<div id="adminModal" class="admin-overlay" style="display:none;">
+		<div class="admin-box">
+			<button id="adminCloseBtn" class="admin-close" aria-label="Sulje">✕</button>
+			<div id="adminLoginView">
+				<h3>🔧 Admin-kirjautuminen</h3>
+				<input type="text" id="adminUser" placeholder="Käyttäjätunnus" autocomplete="off" />
+				<input type="password" id="adminPass" placeholder="Salasana" autocomplete="off" />
+				<button id="adminLoginBtn" class="btn-pink">Kirjaudu</button>
+				<div class="admin-msg" id="adminLoginMsg"></div>
+			</div>
+			<div id="adminPanelView" style="display:none;">
+				<h3>🔧 Admin-paneeli</h3>
+				<div class="admin-current">Nykyiset pisteet: <strong id="adminCurrentScore">0</strong></div>
+				<input type="number" id="adminAmount" placeholder="Määrä" value="100" />
+				<div class="admin-btn-row">
+					<button id="adminAddBtn" class="btn-pink">+ Lisää</button>
+					<button id="adminSetBtn" class="btn-pink">= Aseta</button>
+				</div>
+				<button id="adminLogoutBtn" class="link-reset">Kirjaudu ulos</button>
+			</div>
 		</div>
 	</div>
 
@@ -452,6 +486,65 @@
 			else { bgMusic.pause(); playMusicBtn.textContent='▶ Soita'; }
 		});
 		musicSeek.addEventListener('input', ()=>{ bgMusic.currentTime = Number(musicSeek.value); });
+
+		// ── Admin-paneeli ──
+		const ADMIN_USER = 'admin';
+		const ADMIN_PASS = 'sokeripupu123';
+		let adminAuthed = false;
+
+		const adminModal     = document.getElementById('adminModal');
+		const adminOpenBtn   = document.getElementById('adminOpenBtn');
+		const adminCloseBtn  = document.getElementById('adminCloseBtn');
+		const adminLoginView = document.getElementById('adminLoginView');
+		const adminPanelView = document.getElementById('adminPanelView');
+		const adminUserInput = document.getElementById('adminUser');
+		const adminPassInput = document.getElementById('adminPass');
+		const adminLoginBtn  = document.getElementById('adminLoginBtn');
+		const adminLoginMsg  = document.getElementById('adminLoginMsg');
+		const adminCurrentScoreEl = document.getElementById('adminCurrentScore');
+		const adminAmountInput   = document.getElementById('adminAmount');
+		const adminAddBtn    = document.getElementById('adminAddBtn');
+		const adminSetBtn    = document.getElementById('adminSetBtn');
+		const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+
+		function renderAdminView(){
+			if(adminAuthed){
+				adminLoginView.style.display='none';
+				adminPanelView.style.display='block';
+				adminCurrentScoreEl.textContent = Math.floor(state.score);
+			} else {
+				adminLoginView.style.display='block';
+				adminPanelView.style.display='none';
+			}
+		}
+		function closeAdminModal(){ adminModal.style.display='none'; }
+
+		adminOpenBtn.addEventListener('click', ()=>{ adminModal.style.display='flex'; renderAdminView(); });
+		adminCloseBtn.addEventListener('click', closeAdminModal);
+		adminModal.addEventListener('click', (e)=>{ if(e.target===adminModal) closeAdminModal(); });
+
+		adminLoginBtn.addEventListener('click', ()=>{
+			if(adminUserInput.value.trim()===ADMIN_USER && adminPassInput.value===ADMIN_PASS){
+				adminAuthed=true; adminLoginMsg.textContent=''; renderAdminView();
+			} else {
+				adminLoginMsg.textContent='Väärä tunnus tai salasana.';
+			}
+		});
+
+		adminAddBtn.addEventListener('click', ()=>{
+			const amt=Number(adminAmountInput.value)||0;
+			state.score+=amt; updateUI(); save();
+			adminCurrentScoreEl.textContent=Math.floor(state.score);
+		});
+		adminSetBtn.addEventListener('click', ()=>{
+			const amt=Number(adminAmountInput.value)||0;
+			state.score=amt; updateUI(); save();
+			adminCurrentScoreEl.textContent=Math.floor(state.score);
+		});
+		adminLogoutBtn.addEventListener('click', ()=>{
+			adminAuthed=false; adminUserInput.value=''; adminPassInput.value='';
+			renderAdminView();
+		});
 	</script>
 </body>
 </html>
