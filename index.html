@@ -216,6 +216,10 @@
 		.admin-current{font-size:14px;color:var(--muted);margin-bottom:12px;font-weight:600;}
 		.admin-btn-row{display:flex;gap:8px;justify-content:center;margin-bottom:14px;}
 		.admin-btn-row .btn-pink{flex:1;}
+		.admin-lb-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;border-radius:10px;margin-bottom:6px;background:rgba(255,255,255,0.75);border:1px solid rgba(255,255,255,0.85);}
+		.admin-lb-row .admin-lb-info{font-size:13px;color:var(--muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+		.admin-lb-row .admin-lb-del{background:#c0392b;border:none;color:#fff;font-weight:700;border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;flex-shrink:0;}
+		.admin-lb-row .admin-lb-del:hover{background:#e74c3c;}
 		@media (prefers-reduced-motion: reduce){
 			*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
 		}
@@ -320,6 +324,8 @@
 					<button id="adminSetBtn" class="btn-pink">= Aseta</button>
 				</div>
 				<button id="adminLogoutBtn" class="link-reset">Kirjaudu ulos</button>
+				<h3 style="margin-top:18px;">🏆 Tulostaulukon hallinta</h3>
+				<div id="adminLbList" style="max-height:220px;overflow-y:auto;text-align:left;"></div>
 			</div>
 		</div>
 	</div>
@@ -507,11 +513,32 @@
 		const adminSetBtn    = document.getElementById('adminSetBtn');
 		const adminLogoutBtn = document.getElementById('adminLogoutBtn');
 
+		const adminLbListEl = document.getElementById('adminLbList');
+
+		async function loadAdminLeaderboard(){
+			const { data, error } = await sb.from('leaderboard').select('id, name, score').order('score', { ascending: false });
+			if(error || !data || data.length === 0){ adminLbListEl.innerHTML = '<div class="lb-empty">Ei tuloksia.</div>'; return; }
+			adminLbListEl.innerHTML = data.map(row => `
+				<div class="admin-lb-row">
+					<span class="admin-lb-info">${row.name} — ${Math.floor(row.score).toLocaleString('fi-FI')}</span>
+					<button class="admin-lb-del" data-id="${row.id}">Poista</button>
+				</div>`).join('');
+			adminLbListEl.querySelectorAll('.admin-lb-del').forEach(btn => {
+				btn.addEventListener('click', async () => {
+					btn.disabled = true;
+					await sb.from('leaderboard').delete().eq('id', btn.dataset.id);
+					await loadAdminLeaderboard();
+					loadLeaderboard();
+				});
+			});
+		}
+
 		function renderAdminView(){
 			if(adminAuthed){
 				adminLoginView.style.display='none';
 				adminPanelView.style.display='block';
 				adminCurrentScoreEl.textContent = Math.floor(state.score);
+				loadAdminLeaderboard();
 			} else {
 				adminLoginView.style.display='block';
 				adminPanelView.style.display='none';
