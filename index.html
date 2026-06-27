@@ -18,14 +18,9 @@
 			font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 		}
 		*{box-sizing:border-box}
-		html,body{
-			min-height:100%;
-			margin:0;
-		}
+		html,body{min-height:100%;margin:0;}
 		body{
-			display:flex;
-			align-items:flex-start;
-			justify-content:center;
+			display:flex;align-items:flex-start;justify-content:center;
 			background:linear-gradient(135deg,var(--bg1),var(--bg2));
 			background-attachment:fixed;
 			color:var(--muted);
@@ -33,45 +28,43 @@
 			-moz-osx-font-smoothing:grayscale;
 			padding:36px 16px;
 		}
-
 		.app{
-			width:100%;
-			max-width:980px;
-			background:var(--card);
-			border-radius:14px;
-			padding:22px 26px;
-			box-shadow:var(--shadow);
-			display:flex;
-			flex-direction:column;
-			align-items:center;
-			position:relative;
+			width:100%;max-width:980px;background:var(--card);border-radius:14px;
+			padding:22px 26px;box-shadow:var(--shadow);display:flex;
+			flex-direction:column;align-items:center;position:relative;
 		}
-
-		.score-badge{
-			position:absolute;right:18px;top:14px;text-align:right;color:var(--muted)
-		}
+		.score-badge{position:absolute;right:18px;top:14px;text-align:right;color:var(--muted)}
 		.score-badge .label{font-size:12px;opacity:.7}
-		.score-badge .value{font-weight:800;color:#341; font-size:26px}
-
+		.score-badge .value{font-weight:800;color:#341;font-size:26px}
 		.title{color:var(--accent-2);font-weight:700;font-size:16px}
 
-		.center{
-			display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 16px;
+		/* Online counter */
+		.online-badge{
+			display:flex;align-items:center;gap:6px;
+			background:rgba(255,255,255,0.8);border:1px solid rgba(255,80,150,0.15);
+			border-radius:999px;padding:5px 14px;margin-top:8px;font-size:13px;font-weight:600;color:var(--muted);
+		}
+		.online-dot{
+			width:8px;height:8px;border-radius:50%;background:#22c55e;
+			box-shadow:0 0 0 2px rgba(34,197,94,0.3);
+			animation:pulse 2s infinite;
+		}
+		@keyframes pulse{
+			0%,100%{box-shadow:0 0 0 2px rgba(34,197,94,0.3);}
+			50%{box-shadow:0 0 0 5px rgba(34,197,94,0.1);}
 		}
 
+		.center{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 16px;}
 		.avatar-wrap{
 			width:260px;height:260px;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#fff,#ffeef7);
 			display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,80,150,0.06);
-			box-shadow:0 12px 30px rgba(255,80,150,0.12);
-			cursor:pointer;position:relative;
+			box-shadow:0 12px 30px rgba(255,80,150,0.12);cursor:pointer;position:relative;
 		}
 		.avatar-wrap img{width:100%;height:100%;object-fit:cover;display:block}
 		.avatar-placeholder{font-weight:700;color:var(--accent-2)}
-
 		.meta{margin-top:10px;display:flex;gap:16px;align-items:center}
 		.meta .small{font-size:13px;color:rgba(0,0,0,0.5)}
 		.link-reset{background:transparent;border:none;color:var(--accent-2);cursor:pointer;font-size:13px}
-
 		.panel{background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.95));padding:18px;border-radius:10px;width:100%;max-width:300px;margin-top:16px}
 		.panel h3{margin:0 0 10px 0;color:var(--accent-2);font-size:15px}
 		.upgrade{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:8px;margin-bottom:12px;background:rgba(255,255,255,0.6);border:1px solid rgba(220,100,160,0.06)}
@@ -79,49 +72,25 @@
 		.upgrade .desc{font-size:13px;color:rgba(0,0,0,0.55)}
 		.btn-pink{background:linear-gradient(180deg,var(--accent),var(--accent-2));border:none;color:white;padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:700;box-shadow:0 6px 18px rgba(255,80,150,0.12)}
 		.cost{font-weight:700;margin-left:8px}
-
 		.footer{text-align:center;margin-top:16px;font-size:12px;color:rgba(60,10,30,0.5)}
-
 		.social-link{display:inline-block;margin-top:12px;padding:8px 14px;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:white;text-decoration:none;border-radius:999px;font-weight:700;font-size:13px;box-shadow:0 4px 12px rgba(255,80,150,0.15);transition:transform 0.2s}
 		.social-link:hover{transform:scale(1.05)}
-
 		.image-picker{margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:6px}
 		.image-picker label{font-size:13px;color:rgba(0,0,0,0.6)}
 		.image-picker select{padding:8px 10px;border:1px solid rgba(255,80,150,0.2);border-radius:999px;background:white;color:var(--muted);font-weight:600;min-width:180px}
-		.image-picker .hint{font-size:12px;color:rgba(0,0,0,0.45);text-align:center}
 		.sound-button{margin-top:10px;padding:10px 14px;border:none;border-radius:999px;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:white;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,80,150,0.12)}
-
-		.leaderboard{
-			width:100%;max-width:400px;margin-top:20px;
-			background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.95));
-			padding:18px;border-radius:10px;
-		}
+		.leaderboard{width:100%;max-width:400px;margin-top:20px;background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.95));padding:18px;border-radius:10px;}
 		.leaderboard h3{margin:0 0 12px 0;color:var(--accent-2);font-size:15px;text-align:center}
-		.lb-row{
-			display:flex;align-items:center;justify-content:space-between;
-			padding:8px 12px;border-radius:8px;margin-bottom:6px;
-			background:rgba(255,255,255,0.6);border:1px solid rgba(220,100,160,0.08);
-		}
+		.lb-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;margin-bottom:6px;background:rgba(255,255,255,0.6);border:1px solid rgba(220,100,160,0.08);}
 		.lb-rank{font-weight:800;color:var(--accent-2);width:28px;font-size:15px}
 		.lb-name{flex:1;font-weight:600;color:#6d153a;font-size:14px}
 		.lb-score{font-weight:700;color:var(--muted);font-size:14px}
 		.lb-empty{text-align:center;color:rgba(0,0,0,0.4);font-size:13px;padding:10px}
-
-		.submit-area{
-			display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:12px;
-		}
-		.submit-area input{
-			padding:8px 14px;border:1px solid rgba(255,80,150,0.25);border-radius:999px;
-			font-size:14px;color:var(--muted);outline:none;width:200px;text-align:center;
-		}
+		.submit-area{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:12px;}
+		.submit-area input{padding:8px 14px;border:1px solid rgba(255,80,150,0.25);border-radius:999px;font-size:14px;color:var(--muted);outline:none;width:200px;text-align:center;}
 		.submit-area input:focus{border-color:var(--accent)}
-		.btn-submit{
-			background:linear-gradient(180deg,var(--accent),var(--accent-2));border:none;
-			color:white;padding:9px 20px;border-radius:999px;cursor:pointer;font-weight:700;
-			font-size:13px;box-shadow:0 6px 18px rgba(255,80,150,0.15);
-		}
+		.btn-submit{background:linear-gradient(180deg,var(--accent),var(--accent-2));border:none;color:white;padding:9px 20px;border-radius:999px;cursor:pointer;font-weight:700;font-size:13px;box-shadow:0 6px 18px rgba(255,80,150,0.15);}
 		.submit-msg{font-size:13px;color:var(--accent-2);font-weight:600;min-height:18px}
-
 		@media (max-width:860px){
 			.app{max-width:500px}
 			.score-badge{text-align:left;margin-bottom:12px}
@@ -137,15 +106,18 @@
 			<div class="value" id="score">0</div>
 		</div>
 
+		<div class="online-badge">
+			<div class="online-dot"></div>
+			<span id="onlineCount">1</span> pelaajaa online
+		</div>
+
 		<section class="center">
 			<div class="small">Klikkaile menemää</div>
-
 			<div id="avatarWrap" class="avatar-wrap" title="Klikkaa saada pisteitä">
 				<div class="avatar-placeholder">Klikkaa lisätäksesi kuvan</div>
 				<img id="avatarImg" src="" alt="" style="display:none" />
-				<div id="perClick" class="perclick" style="position:absolute;left:50%;transform:translateX(-50%);bottom:10px;background:rgba(255,255,255,0.85);padding:6px 10px;border-radius:999px;font-weight:700;color:var(--accent-2)">+1</div>
+				<div id="perClick" style="position:absolute;left:50%;transform:translateX(-50%);bottom:10px;background:rgba(255,255,255,0.85);padding:6px 10px;border-radius:999px;font-weight:700;color:var(--accent-2)">+1</div>
 			</div>
-
 			<div class="image-picker">
 				<label for="avatarSelect">Valitse klikkerin kuva</label>
 				<select id="avatarSelect">
@@ -153,11 +125,8 @@
 					<option value="1">Kuva 2</option>
 					<option value="2">Kuva 3</option>
 				</select>
-				<div class="hint"></div>
 			</div>
-
 			<button id="playSoundBtn" class="sound-button">как проходит жизнь?</button>
-
 			<div class="meta">
 				<div class="small">CPS: <span id="cps">0</span></div>
 				<button id="reset" class="link-reset">Reset</button>
@@ -167,22 +136,12 @@
 		<aside class="panel">
 			<h3>Päivitykset</h3>
 			<div class="upgrade">
-				<div>
-					<strong>Voimakkuus</strong>
-					<div class="desc">Lisää pisteitä per klikkaus</div>
-				</div>
-				<div>
-					<button id="buyPower" class="btn-pink">Osta <span class="cost">(<span id="powerCost">10</span>)</span></button>
-				</div>
+				<div><strong>Voimakkuus</strong><div class="desc">Lisää pisteitä per klikkaus</div></div>
+				<div><button id="buyPower" class="btn-pink">Osta <span class="cost">(<span id="powerCost">10</span>)</span></button></div>
 			</div>
 			<div class="upgrade">
-				<div>
-					<strong>Autoclicker</strong>
-					<div class="desc">Antaa pisteitä automaattisesti</div>
-				</div>
-				<div>
-					<button id="buyAuto" class="btn-pink">Osta <span class="cost">(<span id="autoCost">50</span>)</span></button>
-				</div>
+				<div><strong>Autoclicker</strong><div class="desc">Antaa pisteitä automaattisesti</div></div>
+				<div><button id="buyAuto" class="btn-pink">Osta <span class="cost">(<span id="autoCost">50</span>)</span></button></div>
 			</div>
 		</aside>
 
@@ -207,25 +166,49 @@
 		const SUPABASE_KEY = 'sb_publishable_vuoHwtdAQxJrEEZEZu32hA_RMOYativ';
 		const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+		// ── Online counter ──
+		const SESSION_ID = Math.random().toString(36).slice(2);
+		const HEARTBEAT_MS = 15000;   // päivitä joka 15s
+		const TIMEOUT_S   = 40;       // poistu jos ei heartbeattia 40s
+
+		async function heartbeat(){
+			await sb.from('online_players').upsert({ id: SESSION_ID, last_seen: new Date().toISOString() });
+		}
+
+		async function updateOnlineCount(){
+			const cutoff = new Date(Date.now() - TIMEOUT_S * 1000).toISOString();
+			// Poista vanhat
+			await sb.from('online_players').delete().lt('last_seen', cutoff);
+			// Laske aktiiviset
+			const { count } = await sb.from('online_players').select('id', { count: 'exact', head: true });
+			document.getElementById('onlineCount').textContent = count || 1;
+		}
+
+		async function initOnline(){
+			await heartbeat();
+			await updateOnlineCount();
+			setInterval(async () => { await heartbeat(); await updateOnlineCount(); }, HEARTBEAT_MS);
+		}
+
+		// Poista oma sessio kun suljetaan
+		window.addEventListener('beforeunload', () => {
+			navigator.sendBeacon(`${SUPABASE_URL}/rest/v1/online_players?id=eq.${SESSION_ID}`,
+				JSON.stringify({ method: 'DELETE' }));
+			sb.from('online_players').delete().eq('id', SESSION_ID);
+		});
+
+		// ── Leaderboard ──
 		async function loadLeaderboard(){
-			const { data, error } = await sb
-				.from('leaderboard')
-				.select('name, score')
-				.order('score', { ascending: false })
-				.limit(10);
+			const { data, error } = await sb.from('leaderboard').select('name, score').order('score', { ascending: false }).limit(10);
 			const list = document.getElementById('lbList');
-			if(error || !data || data.length === 0){
-				list.innerHTML = '<div class="lb-empty">Ei vielä tuloksia — ole ensimmäinen!</div>';
-				return;
-			}
+			if(error || !data || data.length === 0){ list.innerHTML = '<div class="lb-empty">Ei vielä tuloksia — ole ensimmäinen!</div>'; return; }
 			const medals = ['🥇','🥈','🥉'];
 			list.innerHTML = data.map((row, i) => `
 				<div class="lb-row">
 					<span class="lb-rank">${medals[i] || (i+1)+'.'}</span>
 					<span class="lb-name">${row.name}</span>
 					<span class="lb-score">${Math.floor(row.score).toLocaleString('fi-FI')}</span>
-				</div>
-			`).join('');
+				</div>`).join('');
 		}
 
 		document.getElementById('lbSubmit').addEventListener('click', async () => {
@@ -233,94 +216,87 @@
 			const msg = document.getElementById('lbMsg');
 			if(!name){ msg.textContent = 'Kirjoita nimesi ensin!'; return; }
 			if(state.score < 1){ msg.textContent = 'Klikkaa ensin pisteitä!'; return; }
-
 			const newScore = Math.floor(state.score);
 			msg.textContent = 'Lähetetään...';
-
-			const { data: existing } = await sb
-				.from('leaderboard')
-				.select('id, score')
-				.eq('name', name)
-				.single();
-
+			const { data: existing } = await sb.from('leaderboard').select('id, score').eq('name', name).single();
 			if(existing){
 				if(newScore > existing.score){
 					const { error } = await sb.from('leaderboard').update({ score: newScore }).eq('id', existing.id);
-					if(error){ msg.textContent = 'Virhe, yritä uudelleen.'; }
-					else { msg.textContent = '✅ Uusi ennätys päivitetty!'; loadLeaderboard(); }
+					msg.textContent = error ? 'Virhe, yritä uudelleen.' : '✅ Uusi ennätys päivitetty!';
+					if(!error) loadLeaderboard();
 				} else {
 					msg.textContent = `Sinulla on jo parempi tulos (${existing.score.toLocaleString('fi-FI')})!`;
 				}
 			} else {
 				const { error } = await sb.from('leaderboard').insert({ name, score: newScore });
-				if(error){ msg.textContent = 'Virhe, yritä uudelleen.'; }
-				else { msg.textContent = '✅ Pisteet lähetetty!'; loadLeaderboard(); }
+				msg.textContent = error ? 'Virhe, yritä uudelleen.' : '✅ Pisteet lähetetty!';
+				if(!error) loadLeaderboard();
 			}
 		});
 
-		const state = { score:0, perClick:1, powerLevel:0, autoLevel:0, lastTick: Date.now(), selectedAvatar:0 };
+		// ── Peli ──
+		const state = { score:0, perClick:1, powerLevel:0, autoLevel:0, lastTick:Date.now(), selectedAvatar:0 };
 		const cost = (base, level) => Math.floor(base * Math.pow(1.6, level));
 		const avatarOptions = [
-			{ label: 'Kuva 1', file: 'click-image.jpg' },
-			{ label: 'Kuva 2', file: 'click-image-2.jpg' },
-			{ label: 'Kuva 3', file: 'click-image-3.jpg' }
+			{ label:'Kuva 1', file:'click-image.jpg' },
+			{ label:'Kuva 2', file:'click-image-2.jpg' },
+			{ label:'Kuva 3', file:'click-image-3.jpg' }
 		];
 
-		const scoreEl = document.getElementById('score');
-		const cpsEl = document.getElementById('cps');
-		const buyPowerBtn = document.getElementById('buyPower');
-		const clickSound = new Audio('lightningbulb-spacebar-click-keyboard-199448.mp3');
-		clickSound.preload = 'auto';
-		const specialSound = new Audio('Record (online-voice-recorder.com).mp3');
-		specialSound.preload = 'auto';
+		const scoreEl    = document.getElementById('score');
+		const cpsEl      = document.getElementById('cps');
+		const buyPowerBtn= document.getElementById('buyPower');
 		const buyAutoBtn = document.getElementById('buyAuto');
-		const powerCostEl = document.getElementById('powerCost');
+		const powerCostEl= document.getElementById('powerCost');
 		const autoCostEl = document.getElementById('autoCost');
-		const resetBtn = document.getElementById('reset');
-		const playSoundBtn = document.getElementById('playSoundBtn');
+		const resetBtn   = document.getElementById('reset');
+		const playSoundBtn=document.getElementById('playSoundBtn');
 		const avatarWrap = document.getElementById('avatarWrap');
-		const avatarImg = document.getElementById('avatarImg');
-		const avatarSelect = document.getElementById('avatarSelect');
+		const avatarImg  = document.getElementById('avatarImg');
+		const avatarSelect=document.getElementById('avatarSelect');
 		const perClickEl = document.getElementById('perClick');
-		const placeholder = avatarWrap.querySelector('.avatar-placeholder');
+		const placeholder= avatarWrap.querySelector('.avatar-placeholder');
+		const clickSound = new Audio('lightningbulb-spacebar-click-keyboard-199448.mp3');
+		clickSound.preload='auto';
+		const specialSound=new Audio('Record (online-voice-recorder.com).mp3');
+		specialSound.preload='auto';
 
 		function setAvatar(index){
-			const option = avatarOptions[index] || avatarOptions[0];
-			avatarImg.onerror = null;
-			avatarImg.onload = () => { avatarImg.style.display='block'; placeholder.style.display='none'; };
-			avatarImg.onerror = () => { avatarImg.onerror=null; avatarImg.style.display='none'; placeholder.style.display='flex'; placeholder.textContent=`Kuvaa ei löytynyt: ${option.file}`; };
-			avatarImg.alt = option.label;
-			avatarImg.src = option.file;
+			const option=avatarOptions[index]||avatarOptions[0];
+			avatarImg.onerror=null;
+			avatarImg.onload=()=>{avatarImg.style.display='block';placeholder.style.display='none';};
+			avatarImg.onerror=()=>{avatarImg.onerror=null;avatarImg.style.display='none';placeholder.style.display='flex';placeholder.textContent=`Kuvaa ei löytynyt: ${option.file}`;};
+			avatarImg.alt=option.label; avatarImg.src=option.file;
 		}
-
 		function load(){
 			try{
-				const raw = localStorage.getItem('pink-clicker');
-				if(raw){ const saved=JSON.parse(raw); Object.assign(state,saved); }
-				state.selectedAvatar = Number.isInteger(state.selectedAvatar) ? state.selectedAvatar : 0;
-				avatarSelect.value = String(Math.max(0,Math.min(2,state.selectedAvatar)));
+				const raw=localStorage.getItem('pink-clicker');
+				if(raw){const saved=JSON.parse(raw);Object.assign(state,saved);}
+				state.selectedAvatar=Number.isInteger(state.selectedAvatar)?state.selectedAvatar:0;
+				avatarSelect.value=String(Math.max(0,Math.min(2,state.selectedAvatar)));
 				setAvatar(state.selectedAvatar);
-			}catch(e){ console.warn(e) }
+			}catch(e){console.warn(e)}
 		}
-		function save(){ try{ localStorage.setItem('pink-clicker',JSON.stringify(state)); }catch(e){} }
-		function updateUI(){ scoreEl.textContent=Math.floor(state.score); powerCostEl.textContent=cost(10,state.powerLevel); autoCostEl.textContent=cost(50,state.autoLevel); cpsEl.textContent=(state.autoLevel).toFixed(1); }
-		function playAudio(audio){ try{ audio.currentTime=0; audio.play().catch(()=>{}); }catch(e){} }
+		function save(){try{localStorage.setItem('pink-clicker',JSON.stringify(state));}catch(e){}}
+		function updateUI(){scoreEl.textContent=Math.floor(state.score);powerCostEl.textContent=cost(10,state.powerLevel);autoCostEl.textContent=cost(50,state.autoLevel);cpsEl.textContent=(state.autoLevel).toFixed(1);}
+		function playAudio(a){try{a.currentTime=0;a.play().catch(()=>{});}catch(e){}}
+		function animatePop(el){el.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:160});}
 
-		avatarWrap.addEventListener('click', ()=>{ playAudio(clickSound); state.score+=state.perClick; animatePop(avatarWrap); updateUI(); save(); });
-		avatarSelect.addEventListener('change', ()=>{ state.selectedAvatar=Number(avatarSelect.value); setAvatar(state.selectedAvatar); save(); });
-		playSoundBtn.addEventListener('click', ()=>{ playAudio(specialSound); });
-		buyPowerBtn.addEventListener('click', ()=>{ const c=cost(10,state.powerLevel); if(state.score>=c){ state.score-=c; state.powerLevel++; state.perClick=1+state.powerLevel; updateUI(); save(); } });
-		buyAutoBtn.addEventListener('click', ()=>{ const c=cost(50,state.autoLevel); if(state.score>=c){ state.score-=c; state.autoLevel++; updateUI(); save(); } });
-		resetBtn.addEventListener('click', ()=>{ if(confirm('Resettaa pelin?')){ localStorage.removeItem('pink-clicker'); state.score=0;state.perClick=1;state.powerLevel=0;state.autoLevel=0;state.selectedAvatar=0; avatarSelect.value='0'; setAvatar(0); updateUI(); } });
+		avatarWrap.addEventListener('click',()=>{playAudio(clickSound);state.score+=state.perClick;animatePop(avatarWrap);updateUI();save();});
+		avatarSelect.addEventListener('change',()=>{state.selectedAvatar=Number(avatarSelect.value);setAvatar(state.selectedAvatar);save();});
+		playSoundBtn.addEventListener('click',()=>{playAudio(specialSound);});
+		buyPowerBtn.addEventListener('click',()=>{const c=cost(10,state.powerLevel);if(state.score>=c){state.score-=c;state.powerLevel++;state.perClick=1+state.powerLevel;updateUI();save();}});
+		buyAutoBtn.addEventListener('click',()=>{const c=cost(50,state.autoLevel);if(state.score>=c){state.score-=c;state.autoLevel++;updateUI();save();}});
+		resetBtn.addEventListener('click',()=>{if(confirm('Resettaa pelin?')){localStorage.removeItem('pink-clicker');state.score=0;state.perClick=1;state.powerLevel=0;state.autoLevel=0;state.selectedAvatar=0;avatarSelect.value='0';setAvatar(0);updateUI();}});
 
-		function animatePop(el){ el.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:160}); }
-		function tick(){ const now=Date.now(); const dt=(now-state.lastTick)/1000; state.lastTick=now; state.score+=state.autoLevel*dt; updateUI(); save(); requestAnimationFrame(tick); }
+		function tick(){const now=Date.now();const dt=(now-state.lastTick)/1000;state.lastTick=now;state.score+=state.autoLevel*dt;updateUI();save();requestAnimationFrame(tick);}
 
 		load(); updateUI(); state.lastTick=Date.now();
 		perClickEl.textContent=`+${state.perClick}`;
 		requestAnimationFrame(tick);
 		loadLeaderboard();
 		setInterval(loadLeaderboard, 30000);
+		initOnline();
 	</script>
 </body>
 </html>
