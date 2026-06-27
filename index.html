@@ -18,17 +18,20 @@
 			font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 		}
 		*{box-sizing:border-box}
-		html,body{height:100%}
-		body{
+		html,body{
+			min-height:100%;
 			margin:0;
+		}
+		body{
 			display:flex;
-			align-items:center;
+			align-items:flex-start;
 			justify-content:center;
 			background:linear-gradient(135deg,var(--bg1),var(--bg2));
+			background-attachment:fixed;
 			color:var(--muted);
 			-webkit-font-smoothing:antialiased;
 			-moz-osx-font-smoothing:grayscale;
-			padding:36px;
+			padding:36px 16px;
 		}
 
 		.app{
@@ -88,7 +91,6 @@
 		.image-picker .hint{font-size:12px;color:rgba(0,0,0,0.45);text-align:center}
 		.sound-button{margin-top:10px;padding:10px 14px;border:none;border-radius:999px;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:white;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,80,150,0.12)}
 
-		/* Leaderboard */
 		.leaderboard{
 			width:100%;max-width:400px;margin-top:20px;
 			background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.95));
@@ -173,7 +175,6 @@
 					<button id="buyPower" class="btn-pink">Osta <span class="cost">(<span id="powerCost">10</span>)</span></button>
 				</div>
 			</div>
-
 			<div class="upgrade">
 				<div>
 					<strong>Autoclicker</strong>
@@ -185,7 +186,6 @@
 			</div>
 		</aside>
 
-		<!-- Leaderboard -->
 		<div class="leaderboard">
 			<h3>🏆 Tulostaulukko</h3>
 			<div id="lbList"><div class="lb-empty">Ladataan...</div></div>
@@ -237,7 +237,6 @@
 			const newScore = Math.floor(state.score);
 			msg.textContent = 'Lähetetään...';
 
-			// Tarkista onko nimi jo olemassa
 			const { data: existing } = await sb
 				.from('leaderboard')
 				.select('id, score')
@@ -245,26 +244,20 @@
 				.single();
 
 			if(existing){
-				// Päivitä vain jos uusi tulos on parempi
 				if(newScore > existing.score){
-					const { error } = await sb
-						.from('leaderboard')
-						.update({ score: newScore })
-						.eq('id', existing.id);
+					const { error } = await sb.from('leaderboard').update({ score: newScore }).eq('id', existing.id);
 					if(error){ msg.textContent = 'Virhe, yritä uudelleen.'; }
 					else { msg.textContent = '✅ Uusi ennätys päivitetty!'; loadLeaderboard(); }
 				} else {
 					msg.textContent = `Sinulla on jo parempi tulos (${existing.score.toLocaleString('fi-FI')})!`;
 				}
 			} else {
-				// Lisää uusi rivi
 				const { error } = await sb.from('leaderboard').insert({ name, score: newScore });
 				if(error){ msg.textContent = 'Virhe, yritä uudelleen.'; }
 				else { msg.textContent = '✅ Pisteet lähetetty!'; loadLeaderboard(); }
 			}
 		});
 
-		// Peli
 		const state = { score:0, perClick:1, powerLevel:0, autoLevel:0, lastTick: Date.now(), selectedAvatar:0 };
 		const cost = (base, level) => Math.floor(base * Math.pow(1.6, level));
 		const avatarOptions = [
