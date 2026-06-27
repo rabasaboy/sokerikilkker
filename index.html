@@ -203,12 +203,10 @@
 	</div>
 
 	<script>
-		// Supabase
 		const SUPABASE_URL = 'https://mdwjexuvejsvfympqcwc.supabase.co';
 		const SUPABASE_KEY = 'sb_publishable_vuoHwtdAQxJrEEZEZu32hA_RMOYativ';
 		const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-		// Leaderboard
 		async function loadLeaderboard(){
 			const { data, error } = await sb
 				.from('leaderboard')
@@ -235,14 +233,34 @@
 			const msg = document.getElementById('lbMsg');
 			if(!name){ msg.textContent = 'Kirjoita nimesi ensin!'; return; }
 			if(state.score < 1){ msg.textContent = 'Klikkaa ensin pisteitä!'; return; }
+
+			const newScore = Math.floor(state.score);
 			msg.textContent = 'Lähetetään...';
-			const { error } = await sb.from('leaderboard').insert({ name, score: Math.floor(state.score) });
-			if(error){
-				msg.textContent = 'Virhe, yritä uudelleen.';
-				console.error(error);
+
+			// Tarkista onko nimi jo olemassa
+			const { data: existing } = await sb
+				.from('leaderboard')
+				.select('id, score')
+				.eq('name', name)
+				.single();
+
+			if(existing){
+				// Päivitä vain jos uusi tulos on parempi
+				if(newScore > existing.score){
+					const { error } = await sb
+						.from('leaderboard')
+						.update({ score: newScore })
+						.eq('id', existing.id);
+					if(error){ msg.textContent = 'Virhe, yritä uudelleen.'; }
+					else { msg.textContent = '✅ Uusi ennätys päivitetty!'; loadLeaderboard(); }
+				} else {
+					msg.textContent = `Sinulla on jo parempi tulos (${existing.score.toLocaleString('fi-FI')})!`;
+				}
 			} else {
-				msg.textContent = '✅ Pisteet lähetetty!';
-				loadLeaderboard();
+				// Lisää uusi rivi
+				const { error } = await sb.from('leaderboard').insert({ name, score: newScore });
+				if(error){ msg.textContent = 'Virhe, yritä uudelleen.'; }
+				else { msg.textContent = '✅ Pisteet lähetetty!'; loadLeaderboard(); }
 			}
 		});
 
@@ -276,16 +294,8 @@
 		function setAvatar(index){
 			const option = avatarOptions[index] || avatarOptions[0];
 			avatarImg.onerror = null;
-			avatarImg.onload = () => {
-				avatarImg.style.display = 'block';
-				placeholder.style.display = 'none';
-			};
-			avatarImg.onerror = () => {
-				avatarImg.onerror = null;
-				avatarImg.style.display = 'none';
-				placeholder.style.display = 'flex';
-				placeholder.textContent = `Kuvaa ei löytynyt: ${option.file}`;
-			};
+			avatarImg.onload = () => { avatarImg.style.display='block'; placeholder.style.display='none'; };
+			avatarImg.onerror = () => { avatarImg.onerror=null; avatarImg.style.display='none'; placeholder.style.display='flex'; placeholder.textContent=`Kuvaa ei löytynyt: ${option.file}`; };
 			avatarImg.alt = option.label;
 			avatarImg.src = option.file;
 		}
@@ -293,31 +303,19 @@
 		function load(){
 			try{
 				const raw = localStorage.getItem('pink-clicker');
-				if(raw){ const saved = JSON.parse(raw); Object.assign(state, saved); }
+				if(raw){ const saved=JSON.parse(raw); Object.assign(state,saved); }
 				state.selectedAvatar = Number.isInteger(state.selectedAvatar) ? state.selectedAvatar : 0;
-				avatarSelect.value = String(Math.max(0, Math.min(2, state.selectedAvatar)));
+				avatarSelect.value = String(Math.max(0,Math.min(2,state.selectedAvatar)));
 				setAvatar(state.selectedAvatar);
 			}catch(e){ console.warn(e) }
 		}
-		function save(){ try{ localStorage.setItem('pink-clicker', JSON.stringify(state)); }catch(e){} }
-		function updateUI(){ scoreEl.textContent = Math.floor(state.score); powerCostEl.textContent = cost(10, state.powerLevel); autoCostEl.textContent = cost(50, state.autoLevel); cpsEl.textContent = (state.autoLevel).toFixed(1); }
+		function save(){ try{ localStorage.setItem('pink-clicker',JSON.stringify(state)); }catch(e){} }
+		function updateUI(){ scoreEl.textContent=Math.floor(state.score); powerCostEl.textContent=cost(10,state.powerLevel); autoCostEl.textContent=cost(50,state.autoLevel); cpsEl.textContent=(state.autoLevel).toFixed(1); }
 		function playAudio(audio){ try{ audio.currentTime=0; audio.play().catch(()=>{}); }catch(e){} }
 
-		avatarWrap.addEventListener('click', ()=>{
-			playAudio(clickSound);
-			state.score += state.perClick;
-			animatePop(avatarWrap);
-			updateUI(); save();
-		});
-
-		avatarSelect.addEventListener('change', ()=>{
-			state.selectedAvatar = Number(avatarSelect.value);
-			setAvatar(state.selectedAvatar);
-			save();
-		});
-
+		avatarWrap.addEventListener('click', ()=>{ playAudio(clickSound); state.score+=state.perClick; animatePop(avatarWrap); updateUI(); save(); });
+		avatarSelect.addEventListener('change', ()=>{ state.selectedAvatar=Number(avatarSelect.value); setAvatar(state.selectedAvatar); save(); });
 		playSoundBtn.addEventListener('click', ()=>{ playAudio(specialSound); });
-
 		buyPowerBtn.addEventListener('click', ()=>{ const c=cost(10,state.powerLevel); if(state.score>=c){ state.score-=c; state.powerLevel++; state.perClick=1+state.powerLevel; updateUI(); save(); } });
 		buyAutoBtn.addEventListener('click', ()=>{ const c=cost(50,state.autoLevel); if(state.score>=c){ state.score-=c; state.autoLevel++; updateUI(); save(); } });
 		resetBtn.addEventListener('click', ()=>{ if(confirm('Resettaa pelin?')){ localStorage.removeItem('pink-clicker'); state.score=0;state.perClick=1;state.powerLevel=0;state.autoLevel=0;state.selectedAvatar=0; avatarSelect.value='0'; setAvatar(0); updateUI(); } });
