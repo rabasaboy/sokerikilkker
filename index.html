@@ -4,6 +4,7 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<title>Pinkki Clicker</title>
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 	<style>
 		:root{
 			--bg1: #ffeff6;
@@ -30,7 +31,6 @@
 			padding:36px;
 		}
 
-		/* Card */
 		.app{
 			width:100%;
 			max-width:980px;
@@ -44,7 +44,6 @@
 			position:relative;
 		}
 
-		/* Score badge top-right */
 		.score-badge{
 			position:absolute;right:18px;top:14px;text-align:right;color:var(--muted)
 		}
@@ -53,7 +52,6 @@
 
 		.title{color:var(--accent-2);font-weight:700;font-size:16px}
 
-		/* Center area */
 		.center{
 			display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 16px;
 		}
@@ -71,7 +69,6 @@
 		.meta .small{font-size:13px;color:rgba(0,0,0,0.5)}
 		.link-reset{background:transparent;border:none;color:var(--accent-2);cursor:pointer;font-size:13px}
 
-		/* Right panel */
 		.panel{background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.95));padding:18px;border-radius:10px;width:100%;max-width:300px;margin-top:16px}
 		.panel h3{margin:0 0 10px 0;color:var(--accent-2);font-size:15px}
 		.upgrade{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:8px;margin-bottom:12px;background:rgba(255,255,255,0.6);border:1px solid rgba(220,100,160,0.06)}
@@ -90,6 +87,38 @@
 		.image-picker select{padding:8px 10px;border:1px solid rgba(255,80,150,0.2);border-radius:999px;background:white;color:var(--muted);font-weight:600;min-width:180px}
 		.image-picker .hint{font-size:12px;color:rgba(0,0,0,0.45);text-align:center}
 		.sound-button{margin-top:10px;padding:10px 14px;border:none;border-radius:999px;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:white;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,80,150,0.12)}
+
+		/* Leaderboard */
+		.leaderboard{
+			width:100%;max-width:400px;margin-top:20px;
+			background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.95));
+			padding:18px;border-radius:10px;
+		}
+		.leaderboard h3{margin:0 0 12px 0;color:var(--accent-2);font-size:15px;text-align:center}
+		.lb-row{
+			display:flex;align-items:center;justify-content:space-between;
+			padding:8px 12px;border-radius:8px;margin-bottom:6px;
+			background:rgba(255,255,255,0.6);border:1px solid rgba(220,100,160,0.08);
+		}
+		.lb-rank{font-weight:800;color:var(--accent-2);width:28px;font-size:15px}
+		.lb-name{flex:1;font-weight:600;color:#6d153a;font-size:14px}
+		.lb-score{font-weight:700;color:var(--muted);font-size:14px}
+		.lb-empty{text-align:center;color:rgba(0,0,0,0.4);font-size:13px;padding:10px}
+
+		.submit-area{
+			display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:12px;
+		}
+		.submit-area input{
+			padding:8px 14px;border:1px solid rgba(255,80,150,0.25);border-radius:999px;
+			font-size:14px;color:var(--muted);outline:none;width:200px;text-align:center;
+		}
+		.submit-area input:focus{border-color:var(--accent)}
+		.btn-submit{
+			background:linear-gradient(180deg,var(--accent),var(--accent-2));border:none;
+			color:white;padding:9px 20px;border-radius:999px;cursor:pointer;font-weight:700;
+			font-size:13px;box-shadow:0 6px 18px rgba(255,80,150,0.15);
+		}
+		.submit-msg{font-size:13px;color:var(--accent-2);font-weight:600;min-height:18px}
 
 		@media (max-width:860px){
 			.app{max-width:500px}
@@ -154,9 +183,18 @@
 					<button id="buyAuto" class="btn-pink">Osta <span class="cost">(<span id="autoCost">50</span>)</span></button>
 				</div>
 			</div>
-
-			<div style="margin-top:8px;font-size:13px;color:rgba(0,0,0,0.55)"></div>
 		</aside>
+
+		<!-- Leaderboard -->
+		<div class="leaderboard">
+			<h3>🏆 Tulostaulukko</h3>
+			<div id="lbList"><div class="lb-empty">Ladataan...</div></div>
+			<div class="submit-area">
+				<input type="text" id="lbName" placeholder="Sinun nimesi" maxlength="20" />
+				<button class="btn-submit" id="lbSubmit">Lähetä pisteet</button>
+				<div class="submit-msg" id="lbMsg"></div>
+			</div>
+		</div>
 
 		<div class="footer">
 			<div>Versio 1.0</div>
@@ -164,9 +202,51 @@
 		</div>
 	</div>
 
-	<!-- Fixed embedded avatar; no upload input -->
-
 	<script>
+		// Supabase
+		const SUPABASE_URL = 'https://mdwjexuvejsvfympqcwc.supabase.co';
+		const SUPABASE_KEY = 'sb_publishable_vuoHwtdAQxJrEEZEZu32hA_RMOYativ';
+		const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+		// Leaderboard
+		async function loadLeaderboard(){
+			const { data, error } = await sb
+				.from('leaderboard')
+				.select('name, score')
+				.order('score', { ascending: false })
+				.limit(10);
+			const list = document.getElementById('lbList');
+			if(error || !data || data.length === 0){
+				list.innerHTML = '<div class="lb-empty">Ei vielä tuloksia — ole ensimmäinen!</div>';
+				return;
+			}
+			const medals = ['🥇','🥈','🥉'];
+			list.innerHTML = data.map((row, i) => `
+				<div class="lb-row">
+					<span class="lb-rank">${medals[i] || (i+1)+'.'}</span>
+					<span class="lb-name">${row.name}</span>
+					<span class="lb-score">${Math.floor(row.score).toLocaleString('fi-FI')}</span>
+				</div>
+			`).join('');
+		}
+
+		document.getElementById('lbSubmit').addEventListener('click', async () => {
+			const name = document.getElementById('lbName').value.trim();
+			const msg = document.getElementById('lbMsg');
+			if(!name){ msg.textContent = 'Kirjoita nimesi ensin!'; return; }
+			if(state.score < 1){ msg.textContent = 'Klikkaa ensin pisteitä!'; return; }
+			msg.textContent = 'Lähetetään...';
+			const { error } = await sb.from('leaderboard').insert({ name, score: Math.floor(state.score) });
+			if(error){
+				msg.textContent = 'Virhe, yritä uudelleen.';
+				console.error(error);
+			} else {
+				msg.textContent = '✅ Pisteet lähetetty!';
+				loadLeaderboard();
+			}
+		});
+
+		// Peli
 		const state = { score:0, perClick:1, powerLevel:0, autoLevel:0, lastTick: Date.now(), selectedAvatar:0 };
 		const cost = (base, level) => Math.floor(base * Math.pow(1.6, level));
 		const avatarOptions = [
@@ -205,7 +285,6 @@
 				avatarImg.style.display = 'none';
 				placeholder.style.display = 'flex';
 				placeholder.textContent = `Kuvaa ei löytynyt: ${option.file}`;
-				console.warn(`Kuva ${option.file} ei löytynyt. Laita tiedosto samaan kansioon.`);
 			};
 			avatarImg.alt = option.label;
 			avatarImg.src = option.file;
@@ -214,26 +293,15 @@
 		function load(){
 			try{
 				const raw = localStorage.getItem('pink-clicker');
-				if(raw){
-					const saved = JSON.parse(raw);
-					Object.assign(state, saved);
-				}
+				if(raw){ const saved = JSON.parse(raw); Object.assign(state, saved); }
 				state.selectedAvatar = Number.isInteger(state.selectedAvatar) ? state.selectedAvatar : 0;
 				avatarSelect.value = String(Math.max(0, Math.min(2, state.selectedAvatar)));
 				setAvatar(state.selectedAvatar);
 			}catch(e){ console.warn(e) }
 		}
-		function save(){ try{ localStorage.setItem('pink-clicker', JSON.stringify(state)); }catch(e){}
-		}
-
+		function save(){ try{ localStorage.setItem('pink-clicker', JSON.stringify(state)); }catch(e){} }
 		function updateUI(){ scoreEl.textContent = Math.floor(state.score); powerCostEl.textContent = cost(10, state.powerLevel); autoCostEl.textContent = cost(50, state.autoLevel); cpsEl.textContent = (state.autoLevel).toFixed(1); }
-
-		function playAudio(audio){
-			try{
-				audio.currentTime = 0;
-				audio.play().catch(()=>{});
-			}catch(e){ }
-		}
+		function playAudio(audio){ try{ audio.currentTime=0; audio.play().catch(()=>{}); }catch(e){} }
 
 		avatarWrap.addEventListener('click', ()=>{
 			playAudio(clickSound);
@@ -248,22 +316,20 @@
 			save();
 		});
 
-		playSoundBtn.addEventListener('click', ()=>{
-			playAudio(specialSound);
-		});
+		playSoundBtn.addEventListener('click', ()=>{ playAudio(specialSound); });
 
-		buyPowerBtn.addEventListener('click', ()=>{ const c = cost(10, state.powerLevel); if(state.score >= c){ state.score-=c; state.powerLevel++; state.perClick = 1 + state.powerLevel; updateUI(); save(); } });
-		buyAutoBtn.addEventListener('click', ()=>{ const c = cost(50, state.autoLevel); if(state.score >= c){ state.score-=c; state.autoLevel++; updateUI(); save(); } });
+		buyPowerBtn.addEventListener('click', ()=>{ const c=cost(10,state.powerLevel); if(state.score>=c){ state.score-=c; state.powerLevel++; state.perClick=1+state.powerLevel; updateUI(); save(); } });
+		buyAutoBtn.addEventListener('click', ()=>{ const c=cost(50,state.autoLevel); if(state.score>=c){ state.score-=c; state.autoLevel++; updateUI(); save(); } });
 		resetBtn.addEventListener('click', ()=>{ if(confirm('Resettaa pelin?')){ localStorage.removeItem('pink-clicker'); state.score=0;state.perClick=1;state.powerLevel=0;state.autoLevel=0;state.selectedAvatar=0; avatarSelect.value='0'; setAvatar(0); updateUI(); } });
 
 		function animatePop(el){ el.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:160}); }
+		function tick(){ const now=Date.now(); const dt=(now-state.lastTick)/1000; state.lastTick=now; state.score+=state.autoLevel*dt; updateUI(); save(); requestAnimationFrame(tick); }
 
-		function tick(){ const now=Date.now(); const dt=(now-state.lastTick)/1000; state.lastTick=now; state.score += state.autoLevel * dt; updateUI(); save(); requestAnimationFrame(tick); }
-
-		load(); updateUI(); state.lastTick = Date.now();
-		perClickEl.textContent = `+${state.perClick}`;
+		load(); updateUI(); state.lastTick=Date.now();
+		perClickEl.textContent=`+${state.perClick}`;
 		requestAnimationFrame(tick);
+		loadLeaderboard();
+		setInterval(loadLeaderboard, 30000);
 	</script>
 </body>
 </html>
-
