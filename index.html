@@ -85,6 +85,11 @@
 		.social-link{display:inline-block;margin-top:12px;padding:8px 14px;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:white;text-decoration:none;border-radius:999px;font-weight:700;font-size:13px;box-shadow:0 4px 12px rgba(255,80,150,0.15);transition:transform 0.2s}
 		.social-link:hover{transform:scale(1.05)}
 
+		.image-picker{margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:6px}
+		.image-picker label{font-size:13px;color:rgba(0,0,0,0.6)}
+		.image-picker select{padding:8px 10px;border:1px solid rgba(255,80,150,0.2);border-radius:999px;background:white;color:var(--muted);font-weight:600;min-width:180px}
+		.image-picker .hint{font-size:12px;color:rgba(0,0,0,0.45);text-align:center}
+
 		@media (max-width:860px){
 			.app{max-width:500px}
 			.score-badge{text-align:left;margin-bottom:12px}
@@ -107,6 +112,16 @@
 				<div class="avatar-placeholder">Klikkaa lisätäksesi kuvan</div>
 				<img id="avatarImg" src="" alt="" style="display:none" />
 				<div id="perClick" class="perclick" style="position:absolute;left:50%;transform:translateX(-50%);bottom:10px;background:rgba(255,255,255,0.85);padding:6px 10px;border-radius:999px;font-weight:700;color:var(--accent-2)">+1</div>
+			</div>
+
+			<div class="image-picker">
+				<label for="avatarSelect">Valitse klikkerin kuva</label>
+				<select id="avatarSelect">
+					<option value="0">Kuva 1</option>
+					<option value="1">Kuva 2</option>
+					<option value="2">Kuva 3</option>
+				</select>
+				<div class="hint"></div>
 			</div>
 
 			<div class="meta">
@@ -149,11 +164,13 @@
 	<!-- Fixed embedded avatar; no upload input -->
 
 	<script>
-		const state = { score:0, perClick:1, powerLevel:0, autoLevel:0, lastTick: Date.now() };
+		const state = { score:0, perClick:1, powerLevel:0, autoLevel:0, lastTick: Date.now(), selectedAvatar:0 };
 		const cost = (base, level) => Math.floor(base * Math.pow(1.6, level));
-
-		// Use workspace image file as fixed avatar (click-image.jpg)
-	 	const defaultAvatar = 'click-image.jpg';
+		const avatarOptions = [
+			{ label: 'Kuva 1', file: 'click-image.jpg' },
+			{ label: 'Kuva 2', file: 'click-image-2.jpg' },
+			{ label: 'Kuva 3', file: 'click-image-3.jpg' }
+		];
 
 		const scoreEl = document.getElementById('score');
 		const cpsEl = document.getElementById('cps');
@@ -164,20 +181,38 @@
 		const resetBtn = document.getElementById('reset');
 		const avatarWrap = document.getElementById('avatarWrap');
 		const avatarImg = document.getElementById('avatarImg');
+		const avatarSelect = document.getElementById('avatarSelect');
 		const perClickEl = document.getElementById('perClick');
+		const placeholder = avatarWrap.querySelector('.avatar-placeholder');
+
+		function setAvatar(index){
+			const option = avatarOptions[index] || avatarOptions[0];
+			avatarImg.onerror = null;
+			avatarImg.onload = () => {
+				avatarImg.style.display = 'block';
+				placeholder.style.display = 'none';
+			};
+			avatarImg.onerror = () => {
+				avatarImg.onerror = null;
+				avatarImg.style.display = 'none';
+				placeholder.style.display = 'flex';
+				placeholder.textContent = `Kuvaa ei löytynyt: ${option.file}`;
+				console.warn(`Kuva ${option.file} ei löytynyt. Laita tiedosto samaan kansioon.`);
+			};
+			avatarImg.alt = option.label;
+			avatarImg.src = option.file;
+		}
 
 		function load(){
 			try{
 				const raw = localStorage.getItem('pink-clicker');
-				if(raw) Object.assign(state, JSON.parse(raw));
-				// Use the workspace-provided image file as the fixed clicker image
-				avatarImg.src = defaultAvatar;
-				avatarImg.onerror = () => { 
-					avatarImg.onerror = null; 
-					console.warn(`Kuva ${defaultAvatar} ei löytynyt. Tarkista, että tiedosto on olemassa.`);
-				};
-				avatarImg.style.display = 'block';
-				avatarWrap.querySelector('.avatar-placeholder').style.display = 'none';
+				if(raw){
+					const saved = JSON.parse(raw);
+					Object.assign(state, saved);
+				}
+				state.selectedAvatar = Number.isInteger(state.selectedAvatar) ? state.selectedAvatar : 0;
+				avatarSelect.value = String(Math.max(0, Math.min(2, state.selectedAvatar)));
+				setAvatar(state.selectedAvatar);
 			}catch(e){ console.warn(e) }
 		}
 		function save(){ try{ localStorage.setItem('pink-clicker', JSON.stringify(state)); }catch(e){}
@@ -185,22 +220,27 @@
 
 		function updateUI(){ scoreEl.textContent = Math.floor(state.score); powerCostEl.textContent = cost(10, state.powerLevel); autoCostEl.textContent = cost(50, state.autoLevel); cpsEl.textContent = (state.autoLevel).toFixed(1); }
 
-		// Click on avatar = earn points (avatar is fixed and cannot be changed)
 		avatarWrap.addEventListener('click', ()=>{
 			state.score += state.perClick;
 			animatePop(avatarWrap);
 			updateUI(); save();
 		});
 
+		avatarSelect.addEventListener('change', ()=>{
+			state.selectedAvatar = Number(avatarSelect.value);
+			setAvatar(state.selectedAvatar);
+			save();
+		});
+
 		buyPowerBtn.addEventListener('click', ()=>{ const c = cost(10, state.powerLevel); if(state.score >= c){ state.score-=c; state.powerLevel++; state.perClick = 1 + state.powerLevel; updateUI(); save(); } });
 		buyAutoBtn.addEventListener('click', ()=>{ const c = cost(50, state.autoLevel); if(state.score >= c){ state.score-=c; state.autoLevel++; updateUI(); save(); } });
-		resetBtn.addEventListener('click', ()=>{ if(confirm('Resettaa pelin?')){ localStorage.removeItem('pink-clicker'); state.score=0;state.perClick=1;state.powerLevel=0;state.autoLevel=0; updateUI(); } });
+		resetBtn.addEventListener('click', ()=>{ if(confirm('Resettaa pelin?')){ localStorage.removeItem('pink-clicker'); state.score=0;state.perClick=1;state.powerLevel=0;state.autoLevel=0;state.selectedAvatar=0; avatarSelect.value='0'; setAvatar(0); updateUI(); } });
 
 		function animatePop(el){ el.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:160}); }
 
 		function tick(){ const now=Date.now(); const dt=(now-state.lastTick)/1000; state.lastTick=now; state.score += state.autoLevel * dt; updateUI(); save(); requestAnimationFrame(tick); }
 
-		load(); updateUI(); state.lastTick = Date.now(); // show perClick value
+		load(); updateUI(); state.lastTick = Date.now();
 		perClickEl.textContent = `+${state.perClick}`;
 		requestAnimationFrame(tick);
 	</script>
